@@ -284,10 +284,17 @@ end
 <% end %>
 backend http-routers
     mode http
-    balance roundrobin
+    balance <%= p("ha_proxy.balance") %>
     <% if p("ha_proxy.compress_types") != "" %>
     compression algo gzip
     compression type <%= p("ha_proxy.compress_types") %>
+    <% end %>
+
+    <% if p("ha_proxy.httpchk") == true %>
+    option httpchk <%= p("ha_proxy.httpchk_method") %> <%= p("ha_proxy.httpchk_uri") %> <%= p("ha_proxy.httpchk_version") %>
+    <% end %>
+    <% if p("ha_proxy.httpcheck_expect") == true %>
+    http-check expect <%= p("ha_proxy.httpcheck_expect_match") %> <%= p("ha_proxy.httpcheck_expect_pattern") %>
     <% end %>
 
     <%
@@ -320,10 +327,16 @@ backend http-routers
 <% prefix_hash = (Digest::SHA256.hexdigest prefix.to_s)[0..5] %>
 backend http-routed-backend-<%= prefix_hash %>
     mode http
-    balance roundrobin
+    balance <%= p("ha_proxy.balance") %>
     <% if p("ha_proxy.compress_types") != "" %>
     compression algo gzip
     compression type <%= p("ha_proxy.compress_types") %>
+    <% end %>    
+    <% if p("ha_proxy.httpchk") == true %>
+    option httpchk <%= p("ha_proxy.httpchk_method") %> <%= p("ha_proxy.httpchk_uri") %> <%= p("ha_proxy.httpchk_version") %>
+    <% end %>
+    <% if p("ha_proxy.httpcheck_expect") == true %>
+    http-check expect <%= p("ha_proxy.httpcheck_expect_match") %> <%= p("ha_proxy.httpcheck_expect_pattern") %>
     <% end %>
     <% data["servers"].each_with_index do |ip, index| %>
         server node<%= index %> <%= ip %>:<%= data["port"] %> <% if_p("ha_proxy.resolvers") do -%>

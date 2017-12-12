@@ -171,6 +171,30 @@ properties:
   ha_proxy.backend_port:
     description: "Listening port for Router"
     default: 80
+  ha_proxy.balance:
+    description: "The algorithm used to select a server when doing load balancing"
+    default: roundrobin
+  ha_proxy.httpchk:
+    description: "If true, add httpchk to http backend with default values"
+    default: false
+  ha_proxy.httpchk_method:
+    description: "The HTTP method used for the httpchk request"
+    default: "OPTIONS"
+  ha_proxy.httpchk_uri:
+    description: "The URI referenced in the HTTP request for httpchk"
+    default: " / "
+  ha_proxy.httpchk_version:
+    description: "The HTTP version string. If the server is behaving incorrectly, try using HTTP/1.1"
+    default: "HTTP/1.0"
+  ha_proxy.httpcheck_expect:
+    description: "If true, make HTTP health check consider response contents or specific status codes by adding http-check."
+    default: false
+  ha_proxy.httpcheck_expect_match:
+    description: "the keyword when calling expect indicating how to look for a specific pattern in the response. Can  be `status`, `rstatus`, `string`, or `rstring`."
+    default: "status"
+  ha_proxy.httpcheck_expect_pattern:
+    description: "the pattern to look for when calling expect. can be a string or regex. Spaces in regex are escaped with backslash"
+    default: "200"
   ha_proxy.compress_types:
     description: "If this property is set, gzip compression will be activated for the mime types named in this property. definition like 'text/html text/plain text/css'"
     default: ""
