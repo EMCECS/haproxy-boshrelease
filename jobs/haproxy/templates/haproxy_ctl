@@ -1,72 +1,46 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-
 set -e
 
-source /var/vcap/jobs/haproxy/helpers/ctl_setup.sh 'haproxy'
-PATH=/var/vcap/packages/haproxy/bin:$PATH
-export PATH=$PATH:/var/vcap/packges/ttar/bin
+source /var/vcap/jobs/haproxy/helpers/ctl_setup.sh haproxy
 
 NAME=haproxy
 DAEMON=$(which haproxy)
 CONFIG=/var/vcap/jobs/haproxy/config/haproxy.config
 DESC="HAProxy"
 USER=vcap
-
-PID_FILE=/var/vcap/sys/run/haproxy/pid
-
-TIMESTAMP=$(which date)
+RUNCMD="${DAEMON} -f ${CONFIG} -D -p ${PID_FILE}"
 
 test -x "${DAEMON}"
 test -f "${CONFIG}"
 
 RETVAL=0
 
-ensure_dir() {
-    DIR=$1
-    if [ ! -d "${DIR}" ] ; then
-        mkdir -p "${DIR}"
-        chown -R "${USER}":"${USER}" "${DIR}"
-        chmod 755 "${DIR}"
-    fi
-}
-
-ensure_dirs() {
-    ensure_dir "$(dirname "${PID_FILE}")"
-}
-
-remove_pid() {
-    rm -f "${PID_FILE}"
-    rmdir "$(dirname "${PID_FILE}")" || :
-}
-
-inflate_certs() {
-	# reconstitute certs based on ttar file
-	mkdir -p ${JOB_DIR}/config/ssl
-	ttar < ${JOB_DIR}/config/certs.ttar
-}
+# exec >>${LOG_DIR}/$NAME.log 2>&1
 
 start_haproxy() {
     status_haproxy
     if [ "${RETVAL}" = 0 ]; then
-        echo "HAProxy is currently running"
+        echo "$DESC is currently running"
     else
         RETVAL=0
         ensure_dirs
         inflate_certs
-        echo "$("${TIMESTAMP}"): Starting HAProxy"
+        echo "$("${TIMESTAMP}"): Starting $DESC"
         set +e
-        "${DAEMON}" -f "${CONFIG}" -D -p "${PID_FILE}" 0<&-
+        # -- Add additional scripts here
+        # --
+        $RUNCMD 0<&-
         RETVAL=$?
         set -e
         case "${RETVAL}" in
             0)
-                echo "$("${TIMESTAMP}"): Finished starting HAProxy"
+                echo "$("${TIMESTAMP}"): Finished starting $DESC"
                 echo "SUCCESS"
                 ;;
             *)
-                echo "$("${TIMESTAMP}"): Errored starting HAProxy"
-                echo "$("${TIMESTAMP}"): Errored starting HAProxy" >&2
+                echo "$("${TIMESTAMP}"): Errored starting $DESC"
+                echo "$("${TIMESTAMP}"): Errored starting $DESC" >&2
                 remove_pid
                 echo "FAILED - check logs"
                 RETVAL=1
@@ -89,7 +63,7 @@ stop_haproxy() {
             echo "FAILED - check logs"
         fi
     else
-        echo "HAProxy not running"
+        echo "$DESC not running"
     fi
 }
 

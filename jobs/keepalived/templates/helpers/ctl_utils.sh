@@ -1,3 +1,4 @@
+#@IgnoreInspection BashAddShebang
 # Helper functions used by ctl scripts
 
 # links a job file (probably a config file) into a package
@@ -155,6 +156,65 @@ check_nfs_mount() {
   fi
 }
 
+interface_for_ip() {
+    local ip=$1
+    local network=""
+
+    for route in $(ip route show scope link | cut -d " " -f1); do
+        if [[ $(ip_in_network $route $ip) == 0 ]]; then
+            network=$route
+            break
+        fi
+    done
+
+    if [[ -z $network ]]; then
+        echo "Could not determine an interface for requested VIP: $ip"
+        exit 1
+    fi
+
+    interface=$(ip route show scope link | grep "${network}" | cut -d " " -f3)
+    if [[ -z ${interface} ]]; then
+        echo "Could not find the previously found network ${network} in the routing tables. Something is very wrong"
+        exit 1
+    fi
+    echo "${interface}"
+}
+
+binary_ip() {
+    string_ip=$1
+    i=1
+    binary_ip=0
+    for octet in $(echo "$string_ip" | tr -s "." " "); do
+        binary_ip=$(($binary_ip + ($octet<<(32-(8*$i)))))
+        i=$(($i+1))
+    done
+    echo ${binary_ip}
+}
+
+binary_mask() {
+    bits=$1
+    full_mask=$(((2**32)-1))
+    mask=$((((2**32)-1)-((2**(32-$bits))-1)))
+    echo $mask
+}
+
+ip_in_network() {
+    network=$1
+    target_ip=$2
+
+    net_ip=$(echo $network | cut -d "/" -f1)
+    net_mask=$(echo $network | cut -d "/" -f2)
+
+    net_ip_binary=$(binary_ip "$net_ip")
+    target_ip_binary=$(binary_ip "$target_ip")
+    net_mask_binary=$(binary_mask "$net_mask")
+
+    if [[ $(($net_ip_binary&$net_mask_binary)) == $(($target_ip_binary&$net_mask_binary)) ]]; then
+        echo 0
+    else
+        echo 1
+    fi
+}
 
 ensure_dir() {
     DIR=$1
@@ -178,4 +238,19 @@ inflate_certs() {
 	# reconstitute certs based on ttar file
 	mkdir -p ${JOB_DIR}/config/ssl
 	ttar < ${JOB_DIR}/config/certs.ttar
+}
+
+
+keepalived_vip_interface() {
+    interface=$(interface_for_ip <%= p("keepalived.vip") %>)
+    if [[ $? != 0 || -z ${interface} ]]; then
+        echo "Could not autodetect interface to use for <%= p("keepalived.vip") %>. Cannot continue."
+        exit 1
+    fi
+}
+
+keepalived_configure_interface() {
+    if grep "interface auto" ${CONF_DIR}/keepalived.config.template > /dev/null; then
+        sed "s/interface auto/interface ${interface}/" ${CONF_DIR}/keepalived.config.template > ${CONF_DIR}/keepalived.config
+    fi
 }

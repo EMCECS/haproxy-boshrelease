@@ -25,8 +25,8 @@ TIMESTAMP=$(which date)
 # Try to put all ERb into data/properties.sh.erb
 # incl $NAME, $JOB_INDEX, $WEBAPP_DIR
 source $JOB_DIR/data/properties.sh
-
 source $JOB_DIR/helpers/ctl_utils.sh
+
 redirect_output ${output_label}
 
 export HOME=${HOME:-/home/vcap}
@@ -59,11 +59,7 @@ do
   chown -R vcap:vcap ${dir}
   chmod 775 ${dir}
 done
-
 export TMPDIR=$TMP_DIR
-
-export C_INCLUDE_PATH=/var/vcap/packages/mysqlclient/include/mysql:/var/vcap/packages/sqlite/include:/var/vcap/packages/libpq/include
-export LIBRARY_PATH=/var/vcap/packages/mysqlclient/lib/mysql:/var/vcap/packages/sqlite/lib:/var/vcap/packages/libpq/lib
 
 # consistent place for vendoring python libraries within package
 if [[ -d ${WEBAPP_DIR:-/xxxx} ]]
