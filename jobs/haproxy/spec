@@ -186,6 +186,12 @@ properties:
   ha_proxy.httpchk_version:
     description: "The HTTP version string. If the server is behaving incorrectly, try using HTTP/1.1"
     default: "HTTP/1.0"
+  ha_proxy.httpchk_host:
+    description: "The HTTP host header. This is mandatory in HTTP/1.1"
+    default: ""
+  ha_proxy.httpchk_additional_headers:
+    description: "Additional HTTP headers to include in httpchk request. Make sure to escape everything with '\\' and include '\\r\\n' at the end of each header.  Example: X-My-Foo:\\ bar\\r\\nX-My-bas:\\ bippity"
+    default: ""
   ha_proxy.httpcheck_expect:
     description: "If true, make HTTP health check consider response contents or specific status codes by adding http-check."
     default: false

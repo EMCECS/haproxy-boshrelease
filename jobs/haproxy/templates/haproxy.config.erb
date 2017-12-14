@@ -291,7 +291,7 @@ backend http-routers
     <% end %>
 
     <% if p("ha_proxy.httpchk") == true %>
-    option httpchk <%= p("ha_proxy.httpchk_method") %> <%= p("ha_proxy.httpchk_uri") %> <%= p("ha_proxy.httpchk_version") %>
+    option httpchk <%= p("ha_proxy.httpchk_method") %> <%= p("ha_proxy.httpchk_uri") %> <%= p("ha_proxy.httpchk_version") %><% if p("ha_proxy.httpchk_host") != "" %>\\r\\n<%= p("ha_proxy.httpchk_host") %><% end %><% if p("ha_proxy.httpchk_additional_headers") != "" %>\\r\\n<%= p("ha_proxy.additional_headers") %><% end %>
     <% end %>
     <% if p("ha_proxy.httpcheck_expect") == true %>
     http-check expect <%= p("ha_proxy.httpcheck_expect_match") %> <%= p("ha_proxy.httpcheck_expect_pattern") %>
@@ -331,7 +331,7 @@ backend http-routed-backend-<%= prefix_hash %>
     <% if p("ha_proxy.compress_types") != "" %>
     compression algo gzip
     compression type <%= p("ha_proxy.compress_types") %>
-    <% end %>    
+    <% end %>
     <% if p("ha_proxy.httpchk") == true %>
     option httpchk <%= p("ha_proxy.httpchk_method") %> <%= p("ha_proxy.httpchk_uri") %> <%= p("ha_proxy.httpchk_version") %>
     <% end %>
