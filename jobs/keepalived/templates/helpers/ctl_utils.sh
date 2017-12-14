@@ -254,3 +254,14 @@ keepalived_configure_interface() {
         sed "s/interface auto/interface ${interface}/" ${CONF_DIR}/keepalived.config.template > ${CONF_DIR}/keepalived.config
     fi
 }
+
+keepalived_configure_kernel() {
+    sysctl -w net.ipv4.ip_nonlocal_bind=1
+}
+
+keepalived_configure_iptables() {
+    # permit multicast IPv4 traffic
+    iptables -I INPUT -d 224.0.0.0/8 -j ACCEPT
+    # permit VRRP protocol
+    iptables -I INPUT -p 112 -j ACCEPT
+}

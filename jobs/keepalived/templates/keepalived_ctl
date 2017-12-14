@@ -34,6 +34,8 @@ start_daemon() {
         echo "$("${TIMESTAMP}"): Starting $DESC"
         set +e
         # -- Add additional scripts here
+        keepalived_configure_kernel
+        keepalived_configure_iptables
         keepalived_vip_interface
         keepalived_configure_interface
         # --
