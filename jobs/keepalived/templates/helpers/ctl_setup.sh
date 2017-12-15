@@ -53,7 +53,7 @@ export TMP_DIR=/var/vcap/sys/tmp/$JOB_NAME
 export STORE_DIR=/var/vcap/store/$JOB_NAME
 export CONFIG_DIR=/var/vcap/jobs/$JOB_NAME/config
 export PID_FILE=/var/vcap/sys/run/$JOB_NAME/pid
-for dir in $RUN_DIR $LOG_DIR $TMP_DIR $STORE_DIR $PID_FILE $CONFIG_DIR
+for dir in $RUN_DIR $LOG_DIR $TMP_DIR $STORE_DIR $CONFIG_DIR
 do
   mkdir -p ${dir}
   chown -R vcap:vcap ${dir}
